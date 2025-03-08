@@ -4,7 +4,7 @@ import (
 	"log"
 	"task-management-system/database"
 	"task-management-system/models"
-	"task-management-system/utils"
+	"time"
 
 	"fmt"
 	"net/http"
@@ -13,6 +13,11 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
+)
+
+const (
+	JWTSecret       = "your-secret-key" // Change this to a secure value
+	TokenExpiration = time.Hour * 24
 )
 
 func Register(c *fiber.Ctx) error {
@@ -68,12 +73,24 @@ func Login(c *fiber.Ctx) error {
 	}
 
 	// Generate JWT token
-	token, err := utils.GenerateJWT(input)
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"userID":   user.ID,
+		"username": user.Username,
+		"exp":      time.Now().Add(TokenExpiration).Unix(),
+	})
+
+	tokenString, err := token.SignedString([]byte(JWTSecret))
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Could not generate token"})
 	}
 
-	return c.JSON(fiber.Map{"token": token})
+	return c.JSON(fiber.Map{
+		"token": tokenString,
+		"user": fiber.Map{
+			"id":       user.ID,
+			"username": user.Username,
+		},
+	})
 }
 
 func JWTMiddleware() fiber.Handler {
@@ -83,20 +100,29 @@ func JWTMiddleware() fiber.Handler {
 			return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": "Missing or invalid token"})
 		}
 
+		// Remove "Bearer " prefix if present
+		if len(tokenString) > 7 && strings.ToUpper(tokenString[0:6]) == "BEARER" {
+			tokenString = tokenString[7:]
+		}
+
 		// Parse the token
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-			// Validate the token's signing method etc.
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 				return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 			}
-			return []byte("your_secret_key"), nil // Replace with your actual secret key
+			return []byte(JWTSecret), nil
 		})
 
 		if err != nil || !token.Valid {
 			return c.Status(http.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid token"})
 		}
 
-		// Token is valid, proceed to the next handler
+		// Add user info to context
+		if claims, ok := token.Claims.(jwt.MapClaims); ok {
+			c.Locals("userID", claims["userID"])
+			c.Locals("username", claims["username"])
+		}
+
 		return c.Next()
 	}
 }
