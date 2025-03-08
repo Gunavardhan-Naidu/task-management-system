@@ -43,7 +43,7 @@ function Sidebar() {
 
   const handleSignOut = () => {
     localStorage.removeItem("token");
-    router.push("/signin");
+    router.push("/login");
   };
 
   return (
