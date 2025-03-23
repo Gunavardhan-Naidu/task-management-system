@@ -1,19 +1,50 @@
 "use client";
-import React from "react";
+import React , {useState}from "react";
 import styled from "styled-components";
+import axios from "axios";
+import { useAuth } from "@/app/providers/Sessionprovider";
+import { useRouter } from "next/navigation";
 
-function page() {
+function LoginPage() {
+  const { login } = useAuth();
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      // Replace with your backend URL for login
+      const response = await axios.post("http://127.0.0.1:8080/auth/login", {
+        email,
+        password,
+      });
+      // Assume your backend returns a JSON object with token and user info
+      const { token, user } = response.data;
+      login(token, user);
+      router.push("/");
+    } catch (error: any) {
+      console.error("Login error:", error);
+      setErrorMsg("Login failed. Please check your credentials.");
+    }
+  };
+
   return (
     <LoginStyled>
     <div className="min-h-screen bg-[#181818] text-white" style={{ fontSize: '17px' }}>
-    <form className="max-w-md mx-auto pt-20">
+    <form  onSubmit={handleSubmit} className="max-w-md mx-auto pt-20">
     <h3>Sign In</h3>
+    {errorMsg && <p className="error">{errorMsg}</p>}
     <div className="mb-3">
       <label>Email address</label>
       <input
         type="email"
         className="form-control"
         placeholder="Enter email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        required
       />
     </div>
     <div className="mb-3">
@@ -22,6 +53,9 @@ function page() {
         type="password"
         className="form-control"
         placeholder="Enter password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        required
       />
     </div>
     <div className="mb-3">
@@ -49,7 +83,7 @@ function page() {
   </LoginStyled>
   );
 }
-const LoginStyled = styled.form`
+const LoginStyled = styled.div`
   position: relative;
   width: 100%;
   min-height: 100vh;
@@ -145,4 +179,4 @@ const LoginStyled = styled.form`
     }
   }
 `;
-export default page;
+export default LoginPage;

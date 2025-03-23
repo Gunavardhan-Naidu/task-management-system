@@ -3,14 +3,13 @@ import React, { createContext, useState, useContext } from "react";
 import themes from "./themes";
 import axios from "axios";
 import toast from "react-hot-toast";
-import { useSession } from 'next-auth/react'; 
+import { useAuth } from "@/app/providers/Sessionprovider";  
 
 export const GlobalContext = createContext();
 export const GlobalUpdateContext = createContext();
 
 export const GlobalProvider = ({ children }) => {
-  const { data: session } = useSession(); // Replace useUser with useSession
-  const user = session?.user; // Get user from session
+  const { token, user } = useAuth(); // Get user from session
 
   const [selectedTheme, setSelectedTheme] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
@@ -35,7 +34,11 @@ export const GlobalProvider = ({ children }) => {
   const allTasks = async () => {
     setIsLoading(true);
     try {
-      const res = await axios.get("/api/tasks");
+      const res = await axios.get("/api/tasks", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       const sorted = res.data.sort((a, b) => {
         return (
@@ -53,9 +56,8 @@ export const GlobalProvider = ({ children }) => {
 
   const deleteTask = async (id) => {
     try {
-      const res = await axios.delete(`/api/tasks/${id}`);
+      await axios.delete(`/api/tasks/${id}`);
       toast.success("Task deleted");
-
       allTasks();
     } catch (error) {
       console.log(error);
@@ -65,10 +67,8 @@ export const GlobalProvider = ({ children }) => {
 
   const updateTask = async (task) => {
     try {
-      const res = await axios.put(`/api/tasks`, task);
-
+      await axios.put(`/api/tasks`, task);
       toast.success("Task updated");
-
       allTasks();
     } catch (error) {
       console.log(error);

@@ -6,6 +6,7 @@ import toast from "react-hot-toast";
 import styled from "styled-components";
 import Button from "../Button/Button";
 import { add, plus } from "@/app/utils/Icons";
+import { useAuth } from "@/app/providers/Sessionprovider";
 
 function CreateContent() {
   const [title, setTitle] = useState("");
@@ -38,6 +39,7 @@ function CreateContent() {
     }
   };
 
+  const { token } = useAuth();
   const handleSubmit = async (e: any) => {
     e.preventDefault();
 
@@ -50,13 +52,14 @@ function CreateContent() {
     };
 
     try {
-      const res = await axios.post("/api/tasks", task);
-
+      const res = await axios.post("/api/tasks", task, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       if (res.data.error) {
         toast.error(res.data.error);
-      }
-
-      if (!res.data.error) {
+      } else {
         toast.success("Task created successfully.");
         allTasks();
         closeModal();

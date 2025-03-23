@@ -8,7 +8,7 @@ import GlobalStyleProvider from "./providers/GlobalStyleProvider";
 import ContextProvider from "./providers/ContextProvider";
 import NextTopLoader from "nextjs-toploader";
 
-import SessionProviderWrapper from './providers/Sessionprovider';
+import {AuthProvider} from './providers/Sessionprovider';
 
 const nunito = Nunito({
   weight: ["400", "500", "600", "700", "800"],
@@ -28,7 +28,7 @@ export default function RootLayout({
   // const { userId } = auth();
 
   return (
-    <SessionProviderWrapper>
+    <AuthProvider>
       <html lang="en">
         <head>
           <link
@@ -53,6 +53,6 @@ export default function RootLayout({
           </ContextProvider>
         </body>
       </html>
-      </SessionProviderWrapper>
+      </AuthProvider>
   );
 }

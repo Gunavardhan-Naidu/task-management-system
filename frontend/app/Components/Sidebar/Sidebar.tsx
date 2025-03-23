@@ -47,14 +47,14 @@ function Sidebar() {
   };
 
   return (
-    <SidebarStyled theme={theme} collapsed={collapsed}>
+    <SidebarStyled theme={theme} $collapsed={collapsed}>
       <button className="toggle-nav" onClick={collapseMenu}>
         {collapsed ? bars : arrowLeft}
       </button>
       <div className="profile">
         <div className="profile-overlay"></div>
         <div className="image">
-          <Image width={70} height={70} src={user.imageUrl} alt="profile" />
+          <Image width={70} height={70} src={user.imageUrl} alt="profile" priority />
         </div>
         <h1 className="capitalize">
           {user.firstName} {user.lastName}
@@ -93,7 +93,7 @@ function Sidebar() {
   );
 }
 
-const SidebarStyled = styled.nav<{ collapsed: boolean }>`
+const SidebarStyled = styled.nav<{ $collapsed: boolean }>`
   position: relative;
   width: ${(props) => props.theme.sidebarWidth};
   background-color: ${(props) => props.theme.colorBg2};
@@ -113,7 +113,7 @@ const SidebarStyled = styled.nav<{ collapsed: boolean }>`
 
     transition: all 0.3s cubic-bezier(0.53, 0.21, 0, 1);
     transform: ${(props) =>
-      props.collapsed ? "translateX(-107%)" : "translateX(0)"};
+      props.$collapsed ? "translateX(-107%)" : "translateX(0)"};
 
     .toggle-nav {
       display: block !important;

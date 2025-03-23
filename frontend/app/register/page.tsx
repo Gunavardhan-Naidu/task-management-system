@@ -3,7 +3,7 @@ import React from "react";
 import { useState } from "react";
 import styled from "styled-components";
 
-function page () {
+function RegisterPage () {
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -27,7 +27,10 @@ function page () {
   
         setSuccess("User registered successfully!");
         setError("");
-      } catch (err) {
+        setName("");
+        setEmail("");
+        setPassword("");
+      } catch (err: any) {
         setError(err instanceof Error ? err.message : "An unknown error occurred");
         setSuccess("");
       }
@@ -35,44 +38,63 @@ function page () {
 
   return (
     <RegisterStyled>
-    <div className="min-h-screen bg-[#181818] text-white" style={{ fontSize: '17px' }}>
-    <form className="max-w-md mx-auto pt-20">
-        <h3>Sign Up</h3>
-       
-        <div className="mb-3">
-          <label>Username</label>
-          <input type="text" className="form-control" placeholder="Username" />
-        </div>
-        <div className="mb-3">
-          <label>Email address</label>
-          <input
-            type="email"
-            className="form-control"
-            placeholder="Enter email"
-          />
-        </div>
-        <div className="mb-3">
-          <label>Password</label>
-          <input
-            type="password"
-            className="form-control"
-            placeholder="Enter password"
-          />
-        </div>
-        <div className="d-grid">
-          <button type="submit" className="btn btn-primary">
-            Sign Up
-          </button>
-        </div>
-        <p className="forgot-password text-right">
-          Already registered <a href="/sign-in">sign in?</a>
-        </p>
-      </form>
+      <div className="min-h-screen bg-[#181818] text-white" style={{ fontSize: '17px' }}>
+        <form onSubmit={handleSubmit} className="max-w-md mx-auto pt-20">
+            <h3>Sign Up</h3>
+            {error && <p className="error">{error}</p>}
+            {success && <p className="success">{success}</p>}
+          
+            <div className="mb-3">
+              <label>Username</label>
+              <input type="text" className="form-control" placeholder="Username" />
+            </div>
+            <div className="mb-3">
+              <label>Username</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Username"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    required
+                  />
+            </div>
+            <div className="mb-3">
+              <label>Email address</label>
+              <input
+                type="email"
+                className="form-control"
+                placeholder="Enter email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+            <div className="mb-3">
+              <label>Password</label>
+              <input
+                type="password"
+                className="form-control"
+                placeholder="Enter password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
+            <div className="d-grid">
+              <button type="submit" className="btn btn-primary">
+                Sign Up
+              </button>
+            </div>
+            <p className="forgot-password text-right">
+              Already registered <a href="/sign-in">sign in?</a>
+            </p>
+        </form>
       </div>
-      </RegisterStyled>
+    </RegisterStyled>
   );
 }
-const RegisterStyled = styled.form`
+const RegisterStyled = styled.div`
   position: relative;
   width: 100%;
   min-height: 100vh;
@@ -168,4 +190,4 @@ const RegisterStyled = styled.form`
     }
   }
 `;
-export default page;
+export default RegisterPage;

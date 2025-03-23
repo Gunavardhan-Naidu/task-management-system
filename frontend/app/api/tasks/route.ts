@@ -11,6 +11,13 @@ export async function POST(req: Request) {
     if (!token) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+    
+    const decodedHeader = jwt.decode(token, { complete: true });
+    console.log("Decoded token header:", decodedHeader?.header);
+
+    console.log("JWT_SECRET:", process.env.JWT_SECRET);
+
+
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { userId: string };
     const userId = decoded.userId;
