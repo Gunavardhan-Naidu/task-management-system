@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"log"
+	"path/filepath"
 	"task-management-system/config"
 	"task-management-system/database"
 	"task-management-system/handlers"
@@ -9,9 +11,24 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/websocket/v2"
+	"github.com/joho/godotenv"
 )
 
 func main() {
+	// // Load .env file
+	// err := godotenv.Load()
+	// if err != nil {
+	// 	log.Fatal("Error loading .env file")
+	// }
+
+	// Load .env file from the project root
+	envPath := filepath.Join("..", ".env")
+	log.Println("Loading .env from:", envPath)
+
+	err := godotenv.Load(envPath)
+	if err != nil {
+		log.Fatal("Error loading .env file:", err)
+	}
 	app := fiber.New()
 
 	// Enable CORS
@@ -35,7 +52,6 @@ func main() {
 	// WebSocket endpoint
 	protectedRoutes.Get("/ws", websocket.New(handlers.HandleWebSocket))
 
-	// Task and Auth routes
 	// Task routes
 	protectedRoutes.Post("/tasks", handlers.CreateTask)       // Create a new task
 	protectedRoutes.Get("/tasks", handlers.GetTasks)          // Get all tasks
@@ -43,7 +59,10 @@ func main() {
 	protectedRoutes.Delete("/tasks/:id", handlers.DeleteTask) // Delete a task by ID
 
 	// Start server
-	cfg := config.LoadConfig()
+	cfg, err := config.LoadConfig()
+	if err != nil {
+		panic(err)
+	}
 	fmt.Println("Starting server on port:", cfg.Port)
 	app.Listen(":8080")
 }
