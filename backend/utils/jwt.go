@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"os"
+	"strings"
 	"task-management-system/models"
 	"time"
 
@@ -13,5 +15,6 @@ func GenerateJWT(user models.User) (string, error) {
 		"exp": time.Now().Add(time.Hour * 72).Unix(),
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString([]byte("your_secret_key"))
+	jwtSecret := strings.TrimSpace(os.Getenv("JWT_SECRET"))
+	return token.SignedString([]byte(jwtSecret))
 }
