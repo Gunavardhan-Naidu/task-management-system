@@ -31,7 +31,8 @@ function Tasks({ title, tasks }: Props) {
             title={task.title}
             description={task.description}
             date={task.date}
-            isCompleted={task.isCompleted}
+            is_completed={task.is_completed}
+            is_important={task.is_important}
             id={task.id}
           />
         ))}

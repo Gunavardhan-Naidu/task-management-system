@@ -1,7 +1,7 @@
 "use client";
 import React , {useState}from "react";
 import styled from "styled-components";
-import axios from "axios";
+import axios from '@/app/utils/axios';
 import { useAuth } from "@/app/providers/Sessionprovider";
 import { useRouter } from "next/navigation";
 
@@ -11,172 +11,97 @@ function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMsg('');
+    setIsLoading(true);
+
     try {
-      // Replace with your backend URL for login
-      const response = await axios.post("http://127.0.0.1:8080/auth/login", {
+      const response = await axios.post('/auth/login', {
         email,
         password,
       });
-      // Assume your backend returns a JSON object with token and user info
+
       const { token, user } = response.data;
       login(token, user);
-      router.push("/");
-    } catch (error: any) {
-      console.error("Login error:", error);
-      setErrorMsg("Login failed. Please check your credentials.");
+      router.push('/dashboard');
+    } catch (err: any) {
+      setErrorMsg(err.response?.data?.message || 'Login failed');
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <LoginStyled>
-    <div className="min-h-screen bg-[#181818] text-white" style={{ fontSize: '17px' }}>
-    <form  onSubmit={handleSubmit} className="max-w-md mx-auto pt-20">
-    <h3>Sign In</h3>
-    {errorMsg && <p className="error">{errorMsg}</p>}
-    <div className="mb-3">
-      <label>Email address</label>
-      <input
-        type="email"
-        className="form-control"
-        placeholder="Enter email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        required
-      />
-    </div>
-    <div className="mb-3">
-      <label>Password</label>
-      <input
-        type="password"
-        className="form-control"
-        placeholder="Enter password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        required
-      />
-    </div>
-    <div className="mb-3">
-      <div className="custom-control custom-checkbox">
-        <input
-          type="checkbox"
-          className="custom-control-input"
-          id="customCheck1"
-        />
-        <label className="custom-control-label" htmlFor="customCheck1">
-          Remember me
-        </label>
+      <div className="min-h-screen flex items-center justify-center bg-[#181818] text-white">
+        <form onSubmit={handleSubmit} className="w-full max-w-md p-8 bg-[#212121] rounded-lg shadow-lg">
+          <h3 className="text-2xl font-semibold mb-6 text-center">Sign In</h3>
+          {errorMsg && <p className="text-red-500 mb-4 text-center">{errorMsg}</p>}
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-2">Email address</label>
+            <input
+              type="email"
+              className="w-full px-4 py-2 rounded-md bg-[#131313] border border-[#2a2e35] text-white focus:outline-none focus:border-[#27AE60]"
+              placeholder="Enter email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-2">Password</label>
+            <input
+              type="password"
+              className="w-full px-4 py-2 rounded-md bg-[#131313] border border-[#2a2e35] text-white focus:outline-none focus:border-[#27AE60]"
+              placeholder="Enter password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+          <div className="mb-6">
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                className="h-4 w-4 text-[#27AE60] focus:ring-[#27AE60] border-[#2a2e35] rounded"
+                id="customCheck1"
+              />
+              <label className="ml-2 block text-sm text-gray-300" htmlFor="customCheck1">
+                Remember me
+              </label>
+            </div>
+          </div>
+          <div className="mb-6">
+            <button 
+              type="submit" 
+              className="w-full py-2 px-4 bg-[#27AE60] hover:bg-[#1e8a4a] text-white font-medium rounded-md transition-colors duration-200"
+            >
+              Sign In
+            </button>
+          </div>
+          <p className="text-center text-sm text-gray-400">
+            Don't have an account?{" "}
+            <a href="/register" className="text-[#27AE60] hover:text-[#1e8a4a]">
+              Register
+            </a>
+          </p>
+        </form>
       </div>
-    </div>
-    <div className="d-grid">
-      <button type="submit" className="btn btn-primary">
-        Submit
-      </button>
-    </div>
-    <p className="register text-right">
-      <a href="/register">Register</a>
-    </p>
-  </form>
-  </div>
-  </LoginStyled>
+    </LoginStyled>
   );
 }
+
 const LoginStyled = styled.div`
   position: relative;
   width: 100%;
   min-height: 100vh;
   background-color: ${(props) => props.theme.colorBg2};
-  border-radius: 1rem;
   display: flex;
   justify-content: center;
   align-items: center;
-  color: ${(props) => props.theme.colorGrey3};
-
-  form {
-    background-color: ${(props) => props.theme.colorBg3};
-    padding: 2rem;
-    border-radius: 1rem;
-    border: 1px solid ${(props) => props.theme.borderColor2};
-    width: 100%;
-    max-width: 400px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  }
-  > h1 {
-    font-size: clamp(1.2rem, 5vw, 1.6rem);
-    font-weight: 600;
-    text-align: center;
-    margin-bottom: 2rem;
-    color: ${(props) => props.theme.colorGrey0};
-  }
-
-  color: ${(props) => props.theme.colorGrey1};
-
-  .input-control {
-    position: relative;
-    margin: 1.6rem 0;
-    font-weight: 500;
-
-    @media screen and (max-width: 450px) {
-      margin: 1rem 0;
-    }
-
-    label {
-      margin-bottom: 0.5rem;
-      display: inline-block;
-      font-size: clamp(0.9rem, 5vw, 1.2rem);
-      color: ${(props) => props.theme.colorGrey0};
-
-      span {
-        color: ${(props) => props.theme.colorGrey3};
-      }
-    }
-    input {
-      width: 100%;
-      padding: 1rem;
-      background-color: ${(props) => props.theme.colorGreyDark};
-      color: ${(props) => props.theme.colorGrey2};
-      border-radius: 0.5rem;
-      border: 1px solid ${(props) => props.theme.borderColor2};
-
-      &:focus {
-        outline: none;
-        border-color: ${(props) => props.theme.colorGreenDark};
-      }
-    }
-  }
-
-  .submit-btn button {
-    width: 100%;
-    padding: 0.8rem 2rem;
-    border-radius: 0.8rem;
-    background-color: ${(props) => props.theme.colorPrimaryGreen};
-    color: ${(props) => props.theme.colorWhite};
-    font-weight: 500;
-    font-size: 1.2rem;
-    transition: all 0.35s ease-in-out;
-
-    &:hover {
-      background: ${(props) => props.theme.colorGreenDark} !important;
-    }
-
-    @media screen and (max-width: 500px) {
-      font-size: 0.9rem !important;
-      padding: 0.6rem 1rem !important;
-    }
-  }
-
-  .register {
-    text-align: right;
-    margin-top: 1rem;
-    a {
-      color: ${(props) => props.theme.colorGreenDark};
-      text-decoration: none;
-      &:hover {
-        text-decoration: underline;
-      }
-    }
-  }
 `;
+
 export default LoginPage;

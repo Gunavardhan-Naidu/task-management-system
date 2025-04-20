@@ -46,9 +46,9 @@ function CreateContent() {
     const task = {
       title,
       description,
-      date,
-      completed,
-      important,
+      date: new Date(date).toISOString(),
+      is_completed: completed,
+      is_important: important
     };
 
     try {
@@ -118,7 +118,7 @@ function CreateContent() {
       <div className="input-control toggler">
         <label htmlFor="important">Toggle Important</label>
         <input
-          value={important.toString()}
+          checked={important}
           onChange={handleChange("important")}
           type="checkbox"
           name="important"

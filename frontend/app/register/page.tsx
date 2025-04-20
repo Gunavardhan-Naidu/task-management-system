@@ -2,6 +2,9 @@
 import React from "react";
 import { useState } from "react";
 import styled from "styled-components";
+import axios from '@/app/utils/axios';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/app/providers/Sessionprovider';
 
 function RegisterPage () {
     const [name, setName] = useState("");
@@ -9,185 +12,101 @@ function RegisterPage () {
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
+    const router = useRouter();
+    const { login } = useAuth();
   
     const handleSubmit = async (e: React.FormEvent) => {
       e.preventDefault();
+      setError('');
+      setIsLoading(true);
   
       try {
-        const response = await fetch("http://localhost:8080/auth/register", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name, email, password }),
+        const response = await axios.post('/auth/register', {
+          email,
+          password,
+          name,
         });
   
-        if (!response.ok) {
-          const data = await response.json();
-          throw new Error(data.message || "Failed to register");
-        }
-  
-        setSuccess("User registered successfully!");
-        setError("");
-        setName("");
-        setEmail("");
-        setPassword("");
+        const { token, user } = response.data;
+        login(token, user);
+        router.push('/dashboard');
       } catch (err: any) {
-        setError(err instanceof Error ? err.message : "An unknown error occurred");
-        setSuccess("");
+        setError(err.response?.data?.message || 'Registration failed');
+      } finally {
+        setIsLoading(false);
       }
     };
 
   return (
     <RegisterStyled>
-      <div className="min-h-screen bg-[#181818] text-white" style={{ fontSize: '17px' }}>
-        <form onSubmit={handleSubmit} className="max-w-md mx-auto pt-20">
-            <h3>Sign Up</h3>
-            {error && <p className="error">{error}</p>}
-            {success && <p className="success">{success}</p>}
+      <div className="min-h-screen flex items-center justify-center bg-[#181818] text-white">
+        <form onSubmit={handleSubmit} className="w-full max-w-md p-8 bg-[#212121] rounded-lg shadow-lg">
+          <h3 className="text-2xl font-semibold mb-6 text-center">Sign Up</h3>
+          {error && <p className="text-red-500 mb-4 text-center">{error}</p>}
+          {success && <p className="text-green-500 mb-4 text-center">{success}</p>}
           
-            <div className="mb-3">
-              <label>Username</label>
-              <input type="text" className="form-control" placeholder="Username" />
-            </div>
-            <div className="mb-3">
-              <label>Username</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    placeholder="Username"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    required
-                  />
-            </div>
-            <div className="mb-3">
-              <label>Email address</label>
-              <input
-                type="email"
-                className="form-control"
-                placeholder="Enter email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
-            <div className="mb-3">
-              <label>Password</label>
-              <input
-                type="password"
-                className="form-control"
-                placeholder="Enter password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
-            <div className="d-grid">
-              <button type="submit" className="btn btn-primary">
-                Sign Up
-              </button>
-            </div>
-            <p className="forgot-password text-right">
-              Already registered <a href="/sign-in">sign in?</a>
-            </p>
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-2">Username</label>
+            <input
+              type="text"
+              className="w-full px-4 py-2 rounded-md bg-[#131313] border border-[#2a2e35] text-white focus:outline-none focus:border-[#27AE60]"
+              placeholder="Enter username"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-2">Email address</label>
+            <input
+              type="email"
+              className="w-full px-4 py-2 rounded-md bg-[#131313] border border-[#2a2e35] text-white focus:outline-none focus:border-[#27AE60]"
+              placeholder="Enter email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+          <div className="mb-6">
+            <label className="block text-sm font-medium mb-2">Password</label>
+            <input
+              type="password"
+              className="w-full px-4 py-2 rounded-md bg-[#131313] border border-[#2a2e35] text-white focus:outline-none focus:border-[#27AE60]"
+              placeholder="Enter password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+          <div className="mb-6">
+            <button 
+              type="submit" 
+              className="w-full py-2 px-4 bg-[#27AE60] hover:bg-[#1e8a4a] text-white font-medium rounded-md transition-colors duration-200"
+            >
+              Sign Up
+            </button>
+          </div>
+          <p className="text-center text-sm text-gray-400">
+            Already have an account?{" "}
+            <a href="/login" className="text-[#27AE60] hover:text-[#1e8a4a]">
+              Sign In
+            </a>
+          </p>
         </form>
       </div>
     </RegisterStyled>
   );
 }
+
 const RegisterStyled = styled.div`
   position: relative;
   width: 100%;
   min-height: 100vh;
   background-color: ${(props) => props.theme.colorBg2};
-  border-radius: 1rem;
   display: flex;
   justify-content: center;
   align-items: center;
-  color: ${(props) => props.theme.colorGrey3};
-
-  form {
-    background-color: ${(props) => props.theme.colorBg3};
-    padding: 2rem;
-    border-radius: 1rem;
-    border: 1px solid ${(props) => props.theme.borderColor2};
-    width: 100%;
-    max-width: 400px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  }
-  > h1 {
-    font-size: clamp(1.2rem, 5vw, 1.6rem);
-    font-weight: 600;
-    text-align: center;
-    margin-bottom: 2rem;
-    color: ${(props) => props.theme.colorGrey0};
-  }
-
-  color: ${(props) => props.theme.colorGrey1};
-
-  .input-control {
-    position: relative;
-    margin: 1.6rem 0;
-    font-weight: 500;
-
-    @media screen and (max-width: 450px) {
-      margin: 1rem 0;
-    }
-
-    label {
-      margin-bottom: 0.5rem;
-      display: inline-block;
-      font-size: clamp(0.9rem, 5vw, 1.2rem);
-      color: ${(props) => props.theme.colorGrey0};
-
-      span {
-        color: ${(props) => props.theme.colorGrey3};
-      }
-    }
-    input {
-      width: 100%;
-      padding: 1rem;
-      background-color: ${(props) => props.theme.colorGreyDark};
-      color: ${(props) => props.theme.colorGrey2};
-      border-radius: 0.5rem;
-      border: 1px solid ${(props) => props.theme.borderColor2};
-
-      &:focus {
-        outline: none;
-        border-color: ${(props) => props.theme.colorGreenDark};
-      }
-    }
-  }
-
-  .submit-btn button {
-    width: 100%;
-    padding: 0.8rem 2rem;
-    border-radius: 0.8rem;
-    background-color: ${(props) => props.theme.colorPrimaryGreen};
-    color: ${(props) => props.theme.colorWhite};
-    font-weight: 500;
-    font-size: 1.2rem;
-    transition: all 0.35s ease-in-out;
-
-    &:hover {
-      background: ${(props) => props.theme.colorGreenDark} !important;
-    }
-
-    @media screen and (max-width: 500px) {
-      font-size: 0.9rem !important;
-      padding: 0.6rem 1rem !important;
-    }
-  }
-
-  .register {
-    text-align: right;
-    margin-top: 1rem;
-    a {
-      color: ${(props) => props.theme.colorGreenDark};
-      text-decoration: none;
-      &:hover {
-        text-decoration: underline;
-      }
-    }
-  }
 `;
+
 export default RegisterPage;

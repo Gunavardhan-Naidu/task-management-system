@@ -1,23 +1,18 @@
-
 import type { Metadata } from "next";
-import { Nunito } from "next/font/google";
+import { Inter } from "next/font/google";
 
 import "./globals.css";
 import Sidebar from "./Components/Sidebar/Sidebar";
 import GlobalStyleProvider from "./providers/GlobalStyleProvider";
 import ContextProvider from "./providers/ContextProvider";
 import NextTopLoader from "nextjs-toploader";
+import { AuthProvider } from './providers/Sessionprovider';
 
-import {AuthProvider} from './providers/Sessionprovider';
-
-const nunito = Nunito({
-  weight: ["400", "500", "600", "700", "800"],
-  subsets: ["latin"],
-});
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Task Management System",
-  description: "AI powered Task Management System",
+  description: "A simple task management system",
 };
 
 export default function RootLayout({
@@ -28,18 +23,18 @@ export default function RootLayout({
   // const { userId } = auth();
 
   return (
-    <AuthProvider>
-      <html lang="en">
-        <head>
-          <link
-            rel="stylesheet"
-            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
-            integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA=="
-            crossOrigin="anonymous"
-            referrerPolicy="no-referrer"
-          />
-        </head>
-        <body className={nunito.className}>
+    <html lang="en">
+      <head>
+        <link
+          rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+          integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA=="
+          crossOrigin="anonymous"
+          referrerPolicy="no-referrer"
+        />
+      </head>
+      <body className={inter.className}>
+        <AuthProvider>
           <NextTopLoader
             height={2}
             color="#27AE60"
@@ -51,8 +46,8 @@ export default function RootLayout({
               <div className="w-full">{children}</div>
             </GlobalStyleProvider>
           </ContextProvider>
-        </body>
-      </html>
-      </AuthProvider>
+        </AuthProvider>
+      </body>
+    </html>
   );
 }

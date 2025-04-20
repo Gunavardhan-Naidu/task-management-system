@@ -3,7 +3,7 @@ import React, { createContext, useState, useContext } from "react";
 import themes from "./themes";
 import axios from "axios";
 import toast from "react-hot-toast";
-import { useAuth } from "@/app/providers/Sessionprovider";  
+import { useAuth } from "@/app/providers/Sessionprovider";
 
 export const GlobalContext = createContext();
 export const GlobalUpdateContext = createContext();
@@ -32,6 +32,11 @@ export const GlobalProvider = ({ children }) => {
   };
 
   const allTasks = async () => {
+    if (!token) {
+      console.log("No token available");
+      return;
+    }
+
     setIsLoading(true);
     try {
       const res = await axios.get("/api/tasks", {
@@ -47,42 +52,57 @@ export const GlobalProvider = ({ children }) => {
       });
 
       setTasks(sorted);
-
-      setIsLoading(false);
     } catch (error) {
-      console.log(error);
+      console.error("Error fetching tasks:", error);
+      if (error.response?.status === 401) {
+        console.log("Authentication failed. Please login again.");
+        // You might want to redirect to login here
+      }
+      setTasks([]); // Clear tasks on error
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const deleteTask = async (id) => {
     try {
-      await axios.delete(`/api/tasks/${id}`);
+      await axios.delete(`/api/tasks/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       toast.success("Task deleted");
       allTasks();
     } catch (error) {
-      console.log(error);
       toast.error("Something went wrong");
     }
   };
 
   const updateTask = async (task) => {
     try {
-      await axios.put(`/api/tasks`, task);
+      await axios.put(`/api/tasks/${task.id}`, task, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       toast.success("Task updated");
       allTasks();
     } catch (error) {
-      console.log(error);
       toast.error("Something went wrong");
     }
   };
 
-  const completedTasks = tasks.filter((task) => task.isCompleted === true);
-  const importantTasks = tasks.filter((task) => task.isImportant === true);
-  const incompleteTasks = tasks.filter((task) => task.isCompleted === false);
+  const completedTasks = tasks.filter((task) => task.is_completed === true);
+  const importantTasks = tasks.filter((task) => task.is_important === true);
+  const incompleteTasks = tasks.filter((task) => task.is_completed === false);
 
   React.useEffect(() => {
-    if (user) allTasks();
-  }, [user]);
+    if (user && token) {
+      allTasks();
+    } else {
+      setTasks([]); // Clear tasks when not authenticated
+    }
+  }, [user, token]);
 
   return (
     <GlobalContext.Provider

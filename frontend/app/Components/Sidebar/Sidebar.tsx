@@ -46,12 +46,16 @@ function Sidebar() {
     router.push("/login");
   };
 
+  const handleProfileClick = () => {
+    router.push("/account");
+  };
+
   return (
     <SidebarStyled theme={theme} $collapsed={collapsed}>
       <button className="toggle-nav" onClick={collapseMenu}>
         {collapsed ? bars : arrowLeft}
       </button>
-      <div className="profile">
+      <div className="profile" onClick={handleProfileClick}>
         <div className="profile-overlay"></div>
         <div className="image">
           <Image width={70} height={70} src={user.imageUrl} alt="profile" priority />
